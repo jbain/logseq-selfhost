@@ -16,12 +16,16 @@ This repository publishes four self-hosted images from one codebase:
 - `ghcr.io/<owner>/logseq-selfhost-publish` (Logseq `deps/publish` worker through Wrangler local runtime)
 - `ghcr.io/<owner>/logseq-selfhost-web` (Logseq DB web app static bundle)
 
+It also carries a locally-built (never published) Cognito emulator image for
+running sync auth without AWS.
+
 ## Layout
 
 - `images/sync`: sync image Docker/build/deploy/smoke files
 - `images/sync-worker`: sync Worker image Docker/build/deploy/smoke files
 - `images/publish`: publish image Docker/build/deploy/smoke files
 - `images/web`: web image Docker/build/deploy/smoke files
+- `images/cognito`: local Cognito emulator for self-hosted auth (built locally, not published)
 - `.github/workflows`: reusable build/bump workflows and thin wrappers
 - `mise.toml`: shared pinned toolchain for image builds
 
@@ -31,6 +35,7 @@ This repository publishes four self-hosted images from one codebase:
 - [Sync Worker image guide](images/sync-worker/README.md)
 - [Publish image guide](images/publish/README.md)
 - [Web image guide](images/web/README.md)
+- [Cognito emulator guide](images/cognito/README.md)
 
 ## Upstream
 

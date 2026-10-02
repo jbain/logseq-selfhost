@@ -1,0 +1,24 @@
+# Compose override that builds the web image locally against a self-hosted
+# Cognito emulator instead of pulling the upstream-pointing GHCR image.
+#
+# The published GHCR image is compiled against Logseq's own Cognito and cannot
+# be repointed at runtime, so a local build is required.
+#
+#   docker compose \
+#     -f images/web/docker-compose.yml \
+#     -f images/web/docker-compose.selfhost-auth.yml \
+#     up -d --build
+#
+# Set SELFHOST_COGNITO_* in images/web/.env first.
+services:
+  web:
+    build:
+      context: ../..
+      dockerfile: images/web/Dockerfile
+      args:
+        SELFHOST_COGNITO_ENDPOINT: ${SELFHOST_COGNITO_ENDPOINT:?set SELFHOST_COGNITO_ENDPOINT in images/web/.env}
+        SELFHOST_COGNITO_USER_POOL_ID: ${SELFHOST_COGNITO_USER_POOL_ID:?set SELFHOST_COGNITO_USER_POOL_ID in images/web/.env}
+        SELFHOST_COGNITO_CLIENT_ID: ${SELFHOST_COGNITO_CLIENT_ID:?set SELFHOST_COGNITO_CLIENT_ID in images/web/.env}
+        SELFHOST_COGNITO_OAUTH_DOMAIN: ${SELFHOST_COGNITO_OAUTH_DOMAIN:?set SELFHOST_COGNITO_OAUTH_DOMAIN in images/web/.env}
+    image: logseq-selfhost-web:selfhost-auth
+    pull_policy: build

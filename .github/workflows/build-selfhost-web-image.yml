@@ -19,6 +19,7 @@ on:
     paths:
       - images/web/Dockerfile
       - images/web/nginx.conf
+      - images/web/scripts/patch-cognito.sh
       - images/web/UPSTREAM_LOGSEQ_DB_REF
       - mise.toml
       - .github/workflows/build-selfhost-image-reusable.yml

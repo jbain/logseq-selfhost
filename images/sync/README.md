@@ -33,6 +33,11 @@ Edit `images/sync/.env` values:
 - `DB_SYNC_DATA_DIR`
 - `COGNITO_*`
 
+By default `COGNITO_*` point at Logseq's own Cognito. To drop the AWS dependency
+entirely, run the [Cognito emulator](../cognito/README.md) and replace them with
+its issuer, client id, and JWKS URL. Only one issuer can be accepted at a time,
+so this is mutually exclusive with signing in through real Logseq accounts.
+
 ## Build and publish (GitHub Actions)
 
 Workflow: `.github/workflows/build-selfhost-sync-image.yml`

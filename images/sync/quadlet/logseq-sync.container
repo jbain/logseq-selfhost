@@ -1,0 +1,48 @@
+# Quadlet unit for the sync server (node adapter).
+#
+# The EnvironmentFile must carry the COGNITO_ISSUER, COGNITO_CLIENT_ID and
+# COGNITO_JWKS_URL printed by images/cognito/scripts/seed-user.sh, plus the
+# DB_SYNC_* settings from images/sync/.env.example.
+#
+# On the shared network, point JWKS at the emulator directly and leave the issuer
+# as the public URL. The issuer is only ever string-compared against the token's
+# "iss" claim, while JWKS is really fetched -- so the fetch can stay internal:
+#
+#   COGNITO_ISSUER=https://cognito.example.com/local_AbC12345
+#   COGNITO_JWKS_URL=http://cognito:9229/local_AbC12345/.well-known/jwks.json
+#
+# That keeps token verification off your reverse proxy entirely.
+[Unit]
+Description=Logseq self-hosted sync server
+Documentation=https://github.com/yshalsager/logseq-selfhost/blob/master/images/sync/README.md
+After=network-online.target
+Wants=network-online.target
+# Ordering only -- the sync server fetches JWKS lazily and caches it, so it
+# tolerates the emulator being briefly unavailable.
+After=logseq-cognito.service
+
+[Container]
+ContainerName=logseq-selfhost-sync
+Image=ghcr.io/yshalsager/logseq-selfhost-sync:latest
+
+EnvironmentFile=%h/.config/logseq-selfhost/sync.env
+
+PublishPort=8787:8787
+Volume=logseq-sync.volume:/app/data:Z
+
+# Joins the shared network from quadlet/logseq.network. The alias gives the
+# other containers a short, stable DNS name regardless of ContainerName.
+Network=logseq.network
+NetworkAlias=sync
+
+ReadOnly=true
+Tmpfs=/tmp
+DropCapability=all
+NoNewPrivileges=true
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=120
+
+[Install]
+WantedBy=default.target

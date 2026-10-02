@@ -1,0 +1,28 @@
+# Shared podman network for the self-hosted Logseq stack.
+#
+# Lives at the repository root rather than under images/<name>/quadlet because
+# all three containers join it.
+#
+# Install alongside the container units:
+#   cp quadlet/logseq.network ~/.config/containers/systemd/
+#
+# Quadlet creates the podman network as "systemd-logseq" and adds an automatic
+# service dependency to every unit that references it, so there is nothing to
+# start by hand.
+#
+# Joining a user-defined network (rather than the default one) is what gives the
+# containers working DNS for each other: the sync server can reach the emulator
+# at http://cognito:9229 without hairpinning through your public reverse proxy.
+[Unit]
+Description=Logseq self-hosted container network
+
+[Network]
+NetworkName=logseq
+# Let podman allocate the subnet. Uncomment to pin it if it collides with
+# something else on the host.
+# Subnet=10.89.42.0/24
+# Gateway=10.89.42.1
+
+# Internal=true would block all egress. Do not enable it casually: it also cuts
+# off anything the sync server reaches outbound, and the emulator would still
+# need to be reachable from your reverse proxy.

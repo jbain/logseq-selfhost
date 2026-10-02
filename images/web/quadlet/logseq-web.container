@@ -1,0 +1,35 @@
+# Quadlet unit for the web app.
+#
+# Image=localhost/... because a self-hosted-auth build must be built locally;
+# the published GHCR image is compiled against Logseq's own Cognito.
+# See images/web/README.md.
+[Unit]
+Description=Logseq self-hosted web app
+Documentation=https://github.com/yshalsager/logseq-selfhost/blob/master/images/web/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+ContainerName=logseq-selfhost-web
+Image=localhost/logseq-selfhost-web:selfhost-auth
+Pull=never
+
+PublishPort=3001:8080
+
+# Joins the shared network from quadlet/logseq.network. The alias gives the
+# other containers a short, stable DNS name regardless of ContainerName.
+Network=logseq.network
+NetworkAlias=web
+
+ReadOnly=true
+Tmpfs=/tmp
+Tmpfs=/var/cache/nginx
+DropCapability=all
+NoNewPrivileges=true
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=60
+
+[Install]
+WantedBy=default.target

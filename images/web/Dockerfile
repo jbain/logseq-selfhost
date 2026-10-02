@@ -3,6 +3,15 @@ FROM debian:trixie-slim@sha256:020c0d20b9880058cbe785a9db107156c3c75c2ac944a6aa7
 ARG LOGSEQ_REF=master
 ARG MISE_VERSION=v2026.9.0
 
+# Optional: repoint the client at a self-hosted Cognito emulator. When
+# SELFHOST_COGNITO_ENDPOINT is empty the build is identical to an upstream one
+# and the app authenticates against Logseq's own Cognito.
+# See images/cognito/README.md.
+ARG SELFHOST_COGNITO_ENDPOINT=
+ARG SELFHOST_COGNITO_USER_POOL_ID=
+ARG SELFHOST_COGNITO_CLIENT_ID=
+ARG SELFHOST_COGNITO_OAUTH_DOMAIN=
+
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH=/root/.local/bin:$PATH
 ENV MISE_YES=1
@@ -32,6 +41,13 @@ RUN git init . \
 COPY mise.toml /src/mise.toml
 RUN mise trust /src/mise.toml
 RUN mise exec -- corepack enable
+
+COPY images/web/scripts/patch-cognito.sh /tmp/patch-cognito.sh
+RUN SELFHOST_COGNITO_ENDPOINT="${SELFHOST_COGNITO_ENDPOINT}" \
+    SELFHOST_COGNITO_USER_POOL_ID="${SELFHOST_COGNITO_USER_POOL_ID}" \
+    SELFHOST_COGNITO_CLIENT_ID="${SELFHOST_COGNITO_CLIENT_ID}" \
+    SELFHOST_COGNITO_OAUTH_DOMAIN="${SELFHOST_COGNITO_OAUTH_DOMAIN}" \
+    bash /tmp/patch-cognito.sh
 
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     --mount=type=cache,target=/root/.m2/repository \

@@ -1,0 +1,47 @@
+# Quadlet unit for the Cognito emulator.
+#
+# Install (rootless):
+#   mkdir -p ~/.config/containers/systemd
+#   cp images/cognito/quadlet/logseq-cognito.{container,volume} ~/.config/containers/systemd/
+#   systemctl --user daemon-reload
+#   systemctl --user start logseq-cognito
+#
+# Rootless units stop at logout unless lingering is enabled:
+#   loginctl enable-linger $USER
+#
+# For a system-wide unit use /etc/containers/systemd/ and drop the --user flags.
+[Unit]
+Description=Logseq self-hosted Cognito emulator (cognito-local)
+Documentation=https://github.com/yshalsager/logseq-selfhost/blob/master/images/cognito/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+ContainerName=logseq-selfhost-cognito
+# Built locally because it embeds your private signing key. Pull=never keeps
+# systemd from trying to resolve this against a registry.
+Image=localhost/logseq-selfhost-cognito:local
+Pull=never
+
+# Must contain COGNITO_ISSUER_DOMAIN. Adjust the path for system units.
+EnvironmentFile=%h/.config/logseq-selfhost/cognito.env
+
+PublishPort=9229:9229
+Volume=logseq-cognito.volume:/app/.cognito:Z
+
+# Joins the shared network from quadlet/logseq.network. The alias gives the
+# other containers a short, stable DNS name regardless of ContainerName.
+Network=logseq.network
+NetworkAlias=cognito
+
+ReadOnly=true
+Tmpfs=/tmp
+DropCapability=all
+NoNewPrivileges=true
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=120
+
+[Install]
+WantedBy=default.target

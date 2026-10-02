@@ -28,6 +28,25 @@ Edit `images/web/.env` values:
 - `GHCR_OWNER`
 - `IMAGE_TAG`
 - `WEB_PORT`
+- `SELFHOST_COGNITO_*` (only for a self-hosted-auth local build, see below)
+
+## Self-hosted auth
+
+The published image authenticates against Logseq's own Cognito. To authenticate
+against the local emulator in [`images/cognito`](../cognito/README.md) instead,
+the app has to be rebuilt: the Cognito pool id, client id, endpoint, and OAuth
+domain are compile-time constants with no runtime override.
+
+Set the `SELFHOST_COGNITO_*` values in `images/web/.env`, then:
+
+```bash
+docker compose \
+  -f images/web/docker-compose.yml \
+  -f images/web/docker-compose.selfhost-auth.yml \
+  up -d --build
+```
+
+With those variables unset, the normal build is byte-for-byte unchanged.
 
 ## Build and publish (GitHub Actions)
 

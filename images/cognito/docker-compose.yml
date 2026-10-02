@@ -1,0 +1,29 @@
+services:
+  cognito:
+    # Built locally on purpose: the image embeds your private signing key, so
+    # it must never be pushed to a registry. See images/cognito/README.md.
+    build:
+      context: ../..
+      dockerfile: images/cognito/Dockerfile
+    image: logseq-selfhost-cognito:local
+    container_name: logseq-selfhost-cognito
+    env_file:
+      - path: .env.example
+        required: true
+      - path: .env
+        required: false
+    ports:
+      - '${COGNITO_PORT:-9229}:9229'
+    volumes:
+      - cognito_data:/app/.cognito
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+volumes:
+  cognito_data:
